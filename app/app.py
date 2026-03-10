@@ -24,12 +24,12 @@ def home():
 def predict_app_installs():
     data = request.form
 
-    # القيم الرقمية
+    
     rating = float(data.get('Rating'))
     reviews = int(data.get('Reviews'))
     price = float(data.get('Price'))
 
-    # إنشاء DataFrame من كل القيم النصية
+   
     features = pd.DataFrame({
         'Category': [data.get('Category')],
         'Type': [data.get('Type')],
@@ -42,26 +42,26 @@ def predict_app_installs():
         'Price': [price]
     })
 
-    # إضافة ميزات التاريخ
+    
     last_updated = data.get('Last_Updated')
     date_features = process_input(last_updated)
     features = pd.concat([features, date_features], axis=1)
 
-    # تحويل الأعمدة النصية لأعمدة one-hot
+    
     categorical_cols = ['Category', 'Type', 'Content Rating', 'Genres', 'Current Ver', 'Android Ver']
     features = pd.get_dummies(features, columns=categorical_cols)
 
-    # ملء الأعمدة المفقودة بالقيم صفر
+    
     try:
         model_cols = model.feature_names_in_
         for col in model_cols:
             if col not in features.columns:
                 features[col] = 0
-        features = features[model_cols]  # ترتيب الأعمدة كما يتوقع الموديل
+        features = features[model_cols]  
     except AttributeError:
-        pass  # لو الموديل مش بيدعم feature_names_in_
+        pass  
 
-    # التنبؤ
+
     pred = int(model.predict(features)[0])
     return jsonify({'predicted_installs': pred})
 
