@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Play App Installs Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(to bottom, #a2d5f2, #ffffff);
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    background: #ffffffcc;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+h1 {
+    text-align: center;
+    color: #0277bd;
+    margin-bottom: 30px;
+}
+form label {
+    display: block;
+    margin-top: 20px;
+    font-weight: 600;
+}
+form input[type="text"],
+form input[type="number"],
+form input[type="date"],
+form select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    background-color: #e1f5fe;
+}
+button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin-top: 30px;
+    font-size: 18px;
+    background-color: #0288d1;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: 0.3s;
+}
+button:hover {
+    background-color: #0277bd;
+}
+.result {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #b3e5fc;
+    color: #01579b;
+    font-weight: 700;
+    border-radius: 12px;
+    display: none;
+    text-align: center;
+    font-size: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Google Play App Installs Predictor</h1>
+<form id="predictForm">
+<label for="App">App Name</label>
+<input type="text" id="App" name="App" required>
+
+<label for="Category">Category</label>
+<select id="Category" name="Category" required>
+<option value="Social">Social</option>
+<option value="Game">Game</option>
+<option value="Productivity">Productivity</option>
+<option value="Entertainment">Entertainment</option>
+<option value="Health & Fitness">Health & Fitness</option>
+</select>
+
+<label for="Rating">Rating</label>
+<select id="Rating" name="Rating" required>
+<option value="5.0">5.0</option>
+<option value="4.9">4.9</option>
+<option value="4.8">4.8</option>
+<option value="4.7">4.7</option>
+<option value="4.6">4.6</option>
+<option value="4.5">4.5</option>
+<option value="4.4">4.4</option>
+<option value="4.3">4.3</option>
+<option value="4.2">4.2</option>
+<option value="4.1">4.1</option>
+<option value="4.0">4.0</option>
+</select>
+
+<label for="Reviews">Reviews</label>
+<select id="Reviews" name="Reviews" required>
+<option value="1000">0-1000</option>
+<option value="5000">1001-5000</option>
+<option value="10000">5001-10000</option>
+<option value="50000">10001-50000</option>
+<option value="100000">50001+</option>
+</select>
+
+<label for="Type">Type</label>
+<select id="Type" name="Type" required>
+<option value="Free">Free</option>
+<option value="Paid">Paid</option>
+</select>
+
+<label for="Price">Price</label>
+<select id="Price" name="Price" required>
+<option value="0.0">0.0</option>
+<option value="0.99">0.99</option>
+<option value="1.99">1.99</option>
+<option value="2.99">2.99</option>
+<option value="4.99">4.99</option>
+</select>
+
+<label for="Content_Rating">Content Rating</label>
+<select id="Content_Rating" name="Content_Rating" required>
+<option value="Everyone">Everyone</option>
+<option value="Teen">Teen</option>
+<option value="Mature 17+">Mature 17+</option>
+</select>
+
+<label for="Genres">Genres</label>
+<select id="Genres" name="Genres" required>
+<option value="Social">Social</option>
+<option value="Action">Action</option>
+<option value="Adventure">Adventure</option>
+<option value="Productivity">Productivity</option>
+<option value="Entertainment">Entertainment</option>
+</select>
+
+<label for="Last_Updated">Last Updated</label>
+<input type="date" id="Last_Updated" name="Last_Updated" required>
+
+<label for="Current_Ver">Current Version</label>
+<select id="Current_Ver" name="Current_Ver" required>
+<option value="1.0">1.0</option>
+<option value="1.1">1.1</option>
+<option value="2.0">2.0</option>
+</select>
+
+<label for="Android_Ver">Android Version</label>
+<select id="Android_Ver" name="Android_Ver" required>
+<option value="4.0+">4.0+</option>
+<option value="5.0+">5.0+</option>
+<option value="6.0+">6.0+</option>
+<option value="7.0+">7.0+</option>
+<option value="8.0+">8.0+</option>
+</select>
+
+<button type="submit">Predict Installs</button>
+</form>
+
+<div class="result" id="resultDiv">
+Predicted Installs: <span id="resultText"></span>
+</div>
+</div>
+
+<script>
+const form = document.getElementById('predictForm');
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((value,key) => {
+        if(['Rating','Reviews','Price'].includes(key)){
+            value = parseFloat(value);
+            if(key==='Reviews') value = parseInt(value);
+        }
+        data[key] = value;
+    });
+    const response = await fetch('/predict', {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: new URLSearchParams(data)
+    });
+    const result = await response.json();
+    document.getElementById('resultText').textContent = result['predicted_installs'];
+    document.getElementById('resultDiv').style.display = 'block';
+});
+</script>
+</body>
+</html>
